@@ -8,14 +8,15 @@ services:
     volumes:
       - ./prometheus:/etc/prometheus
 
-auth-service:
-  image: your-auth-service-image:latest
-  ports:
-    - "5001:5001"
-  environment:
-    - REDIS_HOST=your-redis-host
-    - REDIS_PORT=your-redis-port
-
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth/Dockerfile.grpc
+    ports:
+      - "5001:5001"
+    environment:
+      - REDIS_HOST=your-redis-host
+      - REDIS_PORT=your-redis-port
 
   geo-service:
     build:
@@ -26,6 +27,7 @@ auth-service:
       - "8080:8080"
     depends_on:
       - prometheus
+      - auth-service
     environment:
       - PROMETHEUS_URL=http://prometheus:9090
       - RPC_PROTOCOL=json-rpc
